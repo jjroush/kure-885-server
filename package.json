@@ -1,0 +1,22 @@
+{
+  "name": "kure-885-server",
+  "version": "1.0.0",
+  "description": "Websocket server to provide PWA with song information.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjroush/kure-885-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jjroush/kure-885-server/issues"
+  },
+  "homepage": "https://github.com/jjroush/kure-885-server#readme",
+  "dependencies": {
+    "ws": "^7.1.2"
+  }
+}
