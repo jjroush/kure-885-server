@@ -21,7 +21,7 @@ export const registerSpotify = () => {
   );
 };
 
-export const getSpotifySong = input => {
+export const getSpotifySong = async input => {
   if (input === false) {
     return;
   }
@@ -34,10 +34,17 @@ export const getSpotifySong = input => {
     url: ""
   };
 
-  spotifyApi.search(input, ["track"], { limit: 1 }).then(
+  await spotifyApi.search(input, ["track"], { limit: 1 }).then(
     data => {
+      console.log(data.body.tracks.items.length);
+      if (!data.body.tracks.items.length) {
+        return "no songs found";
+      }
+
+      console.log(data.body.tracks.items[0].artists[0].name);
+
       currentSong.title = data.body.tracks.items[0].name;
-      currentSong.artist = data.body.tracks.items[0].artists.name;
+      currentSong.artist = data.body.tracks.items[0].artists[0].name;
       currentSong.url = data.body.tracks.items[0].external_urls.spotify;
     },
     err => {
@@ -67,5 +74,8 @@ export const buildSongQueryFromMetadata = string => {
   //   };
   // }
 
-  return values.join(" ");
+  return values
+    .join(" ")
+    .replace(/\[.*?\]/, "")
+    .replace(/\[.*?\]/, "");
 };

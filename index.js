@@ -1,6 +1,5 @@
 import readline from "readline";
-import EventEmitter from "events";
-class MyEmitter extends EventEmitter {}
+import events from "events";
 import WebSocket from "ws";
 import icy from "icy";
 
@@ -22,19 +21,26 @@ const rl = readline.createInterface({
 
 registerSpotify();
 
-setTimeout(() => {}, 2000);
+setTimeout(() => {}, 3000);
+
+const EventEmitter = new events.EventEmitter();
 
 let currentSong;
 
-const myEmitter = new MyEmitter();
+const songHandler = result => {
+  currentSong = result;
+  EventEmitter.emit("event");
+};
 
 icy.get("http://kure-network.stuorg.iastate.edu:8000/KUREBroadcast", res => {
   // log any "metadata" events that happen
   res.on("metadata", function(metadata) {
     var parsed = icy.parse(metadata);
-    console.error(parsed);
+
     console.log("parsed-song", buildSongQueryFromMetadata(parsed));
-    currentSong = getSpotifySong(buildSongQueryFromMetadata(parsed));
+    getSpotifySong(buildSongQueryFromMetadata(parsed))
+      .then(result => songHandler(result))
+      .catch(err => console.log(err));
   });
 
   res.resume();
@@ -45,11 +51,12 @@ server.on("connection", ws => {
     console.log("received: %s", message);
   });
 
-  myEmitter.on("event", () => {
-    ws.send("initial message");
-  });
+  ws.send(JSON.stringify(currentSong));
 
-  rl.on("line", input => {
+  EventEmitter.on("event", () => {
+    console.log("event found");
     ws.send(JSON.stringify(currentSong));
   });
+
+  console.log("users connected", server.clients.size);
 });
