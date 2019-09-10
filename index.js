@@ -9,6 +9,8 @@ import {
   getSpotifySong
 } from "./spotify.js";
 
+registerSpotify();
+
 const server = new WebSocket.Server(
   { port: 8080 },
   console.log("server started on port 8080")

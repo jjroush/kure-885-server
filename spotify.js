@@ -11,6 +11,7 @@ export const registerSpotify = () => {
     data => {
       console.log("The access token expires in " + data.body["expires_in"]);
       console.log("The access token is " + data.body["access_token"]);
+      console.log("The refresh token is " + data.body["refresh_token"]);
 
       // Save the access token so that it's used in future calls
       spotifyApi.setAccessToken(data.body["access_token"]);
@@ -36,13 +37,9 @@ export const getSpotifySong = async input => {
 
   await spotifyApi.search(input, ["track"], { limit: 1 }).then(
     data => {
-      console.log(data.body.tracks.items.length);
-      if (!data.body.tracks.items.length) {
-        return "no songs found";
+      if (data.body.tracks.total === 0) {
+        return 0;
       }
-
-      console.log(data.body.tracks.items[0].artists[0].name);
-
       currentSong.title = data.body.tracks.items[0].name;
       currentSong.artist = data.body.tracks.items[0].artists[0].name;
       currentSong.url = data.body.tracks.items[0].external_urls.spotify;
@@ -56,14 +53,16 @@ export const getSpotifySong = async input => {
 };
 
 export const buildSongQueryFromMetadata = string => {
-  if (string.StreamTitle.charAt(0) == "[") {
+  if (string.StreamTitle.charAt(0) == "[" || string.StreamTitle == "line2") {
     return false;
   }
 
   const values = string.StreamTitle.split(" - ");
 
-  if (values[1].slice(0, 5) === "[Reco]") {
-    values[1] = values[1].slice(5);
+  if (values.length > 2) {
+    if (values[1].slice(0, 5) === "[Reco]") {
+      values[1] = values[1].slice(5);
+    }
   }
 
   // if (values.length === 3) {
