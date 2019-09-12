@@ -13,10 +13,7 @@ export const registerSpotify = () => {
       console.log("The access token is " + data.body["access_token"]);
 
       // Save the access token so that it's used in future calls
-      // spotifyApi.setAccessToken(data.body["access_token"]);
-      spotifyApi.setAccessToken(
-        "BQDHBkWeEN7PwvpPtJX78PhfKA4KZ-x2yaJFH78g4LWWvqew-aDdOTpKwOlgxxuodV7x3WW0fAqmwhE72ws"
-      );
+      spotifyApi.setAccessToken(data.body["access_token"]);
       return true;
     },
     err => {
@@ -67,7 +64,7 @@ export const getSpotifySong = async input => {
     err => {
       console.log("Something went wrong!", err);
       if (err.statusCode === 401) {
-        registerSpotify().then(() => getSpotifySong(input));
+        registerSpotify();
       }
     }
   );
