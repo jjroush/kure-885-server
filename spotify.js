@@ -11,10 +11,13 @@ export const registerSpotify = () => {
     data => {
       console.log("The access token expires in " + data.body["expires_in"]);
       console.log("The access token is " + data.body["access_token"]);
-      console.log("The refresh token is " + data.body["refresh_token"]);
 
       // Save the access token so that it's used in future calls
-      spotifyApi.setAccessToken(data.body["access_token"]);
+      // spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setAccessToken(
+        "BQDHBkWeEN7PwvpPtJX78PhfKA4KZ-x2yaJFH78g4LWWvqew-aDdOTpKwOlgxxuodV7x3WW0fAqmwhE72ws"
+      );
+      return true;
     },
     err => {
       console.log("Something went wrong when retrieving an access token", err);
@@ -23,29 +26,49 @@ export const registerSpotify = () => {
 };
 
 export const getSpotifySong = async input => {
-  if (input === false) {
+  if (!input) {
     return;
   }
 
+  console.log(input);
+
   const currentSong = {
+    spotify: "",
     title: "",
     artist: "",
     album: "",
     image: "",
-    url: ""
+    url: "",
+    raw: ""
   };
+
+  currentSong.raw = input;
+
+  if (input.charAt(0) == "[" || input == "line2") {
+    currentSong.spotify = false;
+    return currentSong;
+  }
 
   await spotifyApi.search(input, ["track"], { limit: 1 }).then(
     data => {
       if (data.body.tracks.total === 0) {
-        return 0;
+        currentSong.spotify = false;
+        return currentSong;
       }
+
+      console.log(data.body.tracks.items[0].album.name);
+
+      currentSong.album = data.body.tracks.items[0].album.name;
       currentSong.title = data.body.tracks.items[0].name;
       currentSong.artist = data.body.tracks.items[0].artists[0].name;
       currentSong.url = data.body.tracks.items[0].external_urls.spotify;
+      currentSong.spotify = true;
     },
     err => {
       console.log("Something went wrong!", err);
+      if (err.statusCode === 401) {
+        registerSpotify().then(() => getSpotifySong(input));
+      }
     }
   );
 
@@ -53,10 +76,6 @@ export const getSpotifySong = async input => {
 };
 
 export const buildSongQueryFromMetadata = string => {
-  if (string.StreamTitle.charAt(0) == "[" || string.StreamTitle == "line2") {
-    return false;
-  }
-
   const values = string.StreamTitle.split(" - ");
 
   if (values.length > 2) {
@@ -76,5 +95,6 @@ export const buildSongQueryFromMetadata = string => {
   return values
     .join(" ")
     .replace(/\[.*?\]/, "")
-    .replace(/\[.*?\]/, "");
+    .replace(/\[.*?\]/, "")
+    .replace(/\uFFFD/g, "");
 };
