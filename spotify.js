@@ -41,9 +41,12 @@ export const getSpotifySong = async input => {
 
   currentSong.raw = input;
 
-  if (input.charAt(0) == "[" || input == "line2") {
+  if (input.charAt(0) == "[") {
     currentSong.spotify = false;
     return currentSong;
+  }
+
+  if (input == "line2") {
   }
 
   await spotifyApi.search(input, ["track"], { limit: 1 }).then(
