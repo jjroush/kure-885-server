@@ -9,7 +9,6 @@ const spotifyApi = new SpotifyWebApi({
 export const registerSpotify = () => {
   spotifyApi.clientCredentialsGrant().then(
     data => {
-      console.log("The access token expires in " + data.body["expires_in"]);
       console.log("The access token is " + data.body["access_token"]);
 
       // Save the access token so that it's used in future calls
@@ -30,12 +29,13 @@ export const getSpotifySong = async input => {
   console.log(input);
 
   const currentSong = {
-    spotify: "",
-    title: "",
-    artist: "",
-    album: "",
-    image: "",
-    url: "",
+    spotify: {
+      title: "",
+      artist: "",
+      album: "",
+      image: "",
+      url: ""
+    },
     raw: ""
   };
 
@@ -51,18 +51,16 @@ export const getSpotifySong = async input => {
 
   await spotifyApi.search(input, ["track"], { limit: 1 }).then(
     data => {
+      console.log("results", data.body.tracks.total);
       if (data.body.tracks.total === 0) {
-        currentSong.spotify = false;
         return currentSong;
       }
 
-      console.log(data.body.tracks.items[0].album.name);
-
-      currentSong.album = data.body.tracks.items[0].album.name;
-      currentSong.title = data.body.tracks.items[0].name;
-      currentSong.artist = data.body.tracks.items[0].artists[0].name;
-      currentSong.url = data.body.tracks.items[0].external_urls.spotify;
-      currentSong.spotify = true;
+      currentSong.spotify.album = data.body.tracks.items[0].album.name;
+      currentSong.spotify.title = data.body.tracks.items[0].name;
+      currentSong.spotify.artist = data.body.tracks.items[0].artists[0].name;
+      currentSong.spotify.url = data.body.tracks.items[0].external_urls.spotify;
+      currentSong.spotify.image = data.body.tracks.items[0].album.images[1].url;
     },
     err => {
       console.log("Something went wrong!", err);
@@ -83,14 +81,6 @@ export const buildSongQueryFromMetadata = string => {
       values[1] = values[1].slice(5);
     }
   }
-
-  // if (values.length === 3) {
-  //   return {
-  //     title: values[1],
-  //     band: values[0],
-  //     album: values[2]
-  //   };
-  // }
 
   return values
     .join(" ")
