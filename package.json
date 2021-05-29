@@ -20,6 +20,6 @@
   "dependencies": {
     "icy": "^2.1.0",
     "spotify-web-api-node": "^4.0.0",
-    "ws": "^7.1.2"
+    "ws": "^7.4.6"
   }
 }
